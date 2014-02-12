@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 class LinuxProcess(object):
     """ Linux process object with info from /proc/. """
 

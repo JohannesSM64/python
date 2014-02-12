@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import os
 import sys
@@ -51,16 +52,13 @@ def write(*ignore):
         buf += l
     print(open(fn, 'w').write(buf))
 
-def quit():
-    sys.exit()
-
 cmds = {
     'p': print_line,
     'd': delete_line,
     'i': insert_lines,
     'f': set_filename,
     'w': write,
-    'q': quit
+    'q': sys.exit
 }
 
 while True:
