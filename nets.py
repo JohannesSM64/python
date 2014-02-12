@@ -18,22 +18,18 @@ sitedict = {
 
 def open_site(kw, term):
     """ Open the site associated with the keyword in sitedict. """
-    quoted = urllib.parse.quote(term)
-    webbrowser.open(sitedict[kw].format(quoted))
+    webbrowser.open(sitedict[kw].format(urllib.parse.quote(term)))
 
 if __name__ == '__main__':
     import os
 
-    bname = os.path.basename(sys.argv[0])
-
     def available_sites():
-        """ Print sites and associated keywords in sitedict. """
         print('Available sites:')
         for i in sitedict:
-            print('{}: {}'.format(i, sitedict[i]))
+            print('* {}: {}'.format(i, sitedict[i]))
 
     if not sys.argv[2:]:
-        print('Usage: {} site term'.format(bname))
+        print('Usage: {} site term'.format(os.path.basename(sys.argv[0])))
         available_sites()
         sys.exit(1)
 
@@ -42,3 +38,4 @@ if __name__ == '__main__':
     except KeyError:
         print('No such site in sitedict: {}'.format(sys.argv[1]))
         available_sites()
+        sys.exit(1)
