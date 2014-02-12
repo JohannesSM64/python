@@ -53,22 +53,17 @@ class LinuxProcess(object):
                        "policy"                : stat[40],
                        "delayacct_blkio_ticks" : stat[41],
                        "guest_time"            : stat[42],
-                       "cguest_time"           : stat[43],
-                       }
+                       "cguest_time"           : stat[43], }
         return self._stat
 
     @property
     def cmdline(self):
-        cmdline = open("/proc/{}/cmdline".format(self.process)).read()
-        cmdlineconv = cmdline.rstrip('\x00').split('\x00')
-        self._cmdline = cmdlineconv
+        self._cmdline = open("/proc/{}/cmdline".format(self.process)).read().rstrip('\x00').split('\x00')
         return self._cmdline
 
     @property
     def environ(self):
-        environ = open("/proc/{}/environ".format(self.process)).read()
-        environconv = environ.rstrip('\x00').split('\x00')
-        self._environ = {i.split('=')[0]: i.split('=')[1] for i in environconv}
+        self._environ = {pair[0]: pair[1] for pair in [entry.split('=') for entry in open("/proc/{}/environ".format(self.process)).read().rstrip('\x00').split('\x00')]}
         return self._environ
 
     @property
@@ -78,15 +73,11 @@ class LinuxProcess(object):
 
     @property
     def mounts(self):
-        mounts = open("/proc/{}/mounts".format(self.process)).read()
-        mountsconv = mounts.split('\n')
-        mountsconv.pop()
-        self._mounts = mountsconv
+        self._mounts = open("/proc/{}/mounts".format(self.process)).read().split('\n')[1:]
         return self._mounts
 
 if __name__ == '__main__':
     import os
-    import sys
     import re
 
     kthreads = []
