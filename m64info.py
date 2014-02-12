@@ -22,7 +22,7 @@ hinfo = OrderedDict([
    ('sound_plugin',   header[354:418]),
    ('input_plugin',   header[418:482]),
    ('rsp_plugin',     header[482:546]),
-   ('author',        header[546:768]),
+   ('author',         header[546:768]),
    ('description',    header[768:1024])
 ])
 
