@@ -1,15 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import os
+import re
+
 class LinuxProcess(object):
     """ Linux process object with info from /proc/. """
 
-    def __init__(self, process):
-        self.process = process
+    def __init__(self, num):
+        self.num = num
+        self.path = "/proc/{}/".format(num)
+        if not os.path.exists(self.path):
+            raise Exception("There is no process with ID {}.".format(num))
 
     @property
     def stat(self):
-        stat = open("/proc/{}/stat".format(self.process)).read().split()
+        stat = open(self.path + "stat").read().split()
         self._stat = { "pid"                   : stat[0],
                        "comm"                  : stat[1],
                        "state"                 : stat[2],
@@ -58,28 +64,25 @@ class LinuxProcess(object):
 
     @property
     def cmdline(self):
-        self._cmdline = open("/proc/{}/cmdline".format(self.process)).read().rstrip('\x00').split('\x00')
+        self._cmdline = open(self.path + "cmdline").read().rstrip('\x00').split('\x00')
         return self._cmdline
 
     @property
     def environ(self):
-        self._environ = {pair[0]: pair[1] for pair in [entry.split('=') for entry in open("/proc/{}/environ".format(self.process)).read().rstrip('\x00').split('\x00')]}
+        self._environ = {pair[0]: pair[1] for pair in [entry.split('=') for entry in open(self.path + "environ").read().rstrip('\x00').split('\x00')]}
         return self._environ
 
     @property
     def cwd(self):
-        self._cwd = os.readlink("/proc/{}/cwd".format(self.process))
+        self._cwd = os.readlink(self.path + "cwd")
         return self._cwd
 
     @property
     def mounts(self):
-        self._mounts = open("/proc/{}/mounts".format(self.process)).read().split('\n')[1:]
+        self._mounts = open(self.path + "mounts").read().split('\n')[1:]
         return self._mounts
 
 if __name__ == '__main__':
-    import os
-    import re
-
     kthreads = []
     nonkthreads = []
     for p in [LinuxProcess(m) for m in os.listdir("/proc/") if re.match(r"[0-9]+", m)]:
@@ -90,7 +93,7 @@ if __name__ == '__main__':
 
     print("kthreads:")
     for i in kthreads:
-        print("{}: {}".format(i.process, i.stat["comm"]))
+        print("{}: {}".format(i.num, i.stat["comm"]))
     print("\nother processes:")
     for i in nonkthreads:
-        print("{}: {}".format(i.process, ' '.join(i.cmdline)))
+        print("{}: {}".format(i.num, ' '.join(i.cmdline)))
