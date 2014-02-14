@@ -3,7 +3,7 @@
 
 """ Open a wiki/search engine query in your web browser. """
 
-# Written by Johannes Langøy, 2010-2011. Public domain.
+# Written by Johannes Langøy, 2010-2014. Public domain.
 
 import sys
 import webbrowser
