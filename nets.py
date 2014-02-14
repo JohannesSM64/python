@@ -35,4 +35,4 @@ if __name__ == '__main__':
     elif not sys.argv[1] in sitedict:
         error('No such site in sitedict: {}'.format(sys.argv[1]))
 
-    open_site(sys.argv[1], sys.argv[2])
+    open_site(sys.argv[1], ' '.join(sys.argv[2:]))
