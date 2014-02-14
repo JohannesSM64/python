@@ -5,10 +5,9 @@
 historical baggage. It is hence not compliant with POSIX sh. """
 
 # Current features are:
+# - A basic parser which understands spaces, quotes and backslashes
 # - Directory changing with cd, and directory history "undo" and
 # "redo" with cdu and cdr
-# - Multiple commands on one line with &
-# - Comments with # to EOL
 
 # TODO:
 # - Text inside parentheses will be executed as a command and its
@@ -16,20 +15,12 @@ historical baggage. It is hence not compliant with POSIX sh. """
 # - Piping with |
 
 # Written by Johannes Langøy, 2010. Public domain.
+# Updated 2014.
 
 import re
 import os
 import sys
-import shlex
 import subprocess
-
-def rehash():
-    """ Generate available completions for external commands. """
-    global extprogs
-    extprogs = []
-    for d in os.getenv('PATH').split(':'):
-        if os.path.isdir(d):
-            extprogs.extend(os.listdir(d))
 
 def get_cmdline(prompt):
     """ Get and return command line from stdin, using prompt if
@@ -43,12 +34,32 @@ def get_cmdline(prompt):
         sys.exit()
     return cmdline
 
-def lexer(s):
-    """ Helper for lexing and handling syntax errors. """
-    try:
-        return shlex.split(s, comments=True)
-    except ValueError as inst:
-        print('shell: {0}'.format(inst))
+def parse(line):
+    """ Split an input line into a list of arguments. """
+    result = []
+    word = ''
+    inquotes = False
+    inparens = False
+    backslashed = False
+
+    for c in line:
+        if c == '\\':
+            backslashed = True
+            continue
+        if not backslashed and c in ['"', "'"]:
+            inquotes = not inquotes
+            continue
+        if not backslashed and c == ' ':
+            if inquotes:
+                word += c
+            else:
+                result.append(word)
+                word = ''
+        else:
+            word += c
+        backslashed = False
+    result.append(word)
+    return result
 
 # Used later for cd history.
 earlierdirs = []
@@ -103,22 +114,20 @@ builtins = {
 
 def process(line):
     """ Process a command line. """
-    parts = [lexer(i) for i in line.split('&')]
+    line = parse(line)
+    if line[0] == '':
+        return
 
-    for part in parts:
-        # Check if the first word on the command line corresponds to
-        # the name of a shell builtin, and if so, call it with the
-        # args provided. If not, execute it as an external command
-        # with the args provided.
-        if not part:
-            continue
-        if part[0] in builtins:
-            builtins[part[0]](*part[1:])
-        else:
-            try:
-                subprocess.call(part)
-            except OSError as inst:
-                print('shell: {0}'.format(inst))
+    # If the first word on the command line equals the name of a shell
+    # builtin, call it with the args provided. If not, execute it as an
+    # external command with the args provided.
+    if line[0] in builtins:
+        builtins[line[0]](*line[1:])
+    else:
+        try:
+            subprocess.call(line)
+        except OSError as inst:
+            print('shell: {0}'.format(inst))
 
 def main():
     # Put arguments into the env.
