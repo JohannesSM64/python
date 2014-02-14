@@ -11,8 +11,6 @@ historical baggage. It is hence not compliant with POSIX sh. """
 # "redo" with cdu and cdr
 
 # TODO:
-# - Text inside parentheses will be executed as a command and its
-# output inserted
 # - Piping with |
 
 # Written by Johannes Langøy, 2010. Public domain.
@@ -52,11 +50,24 @@ def parse(line):
         if not backslashed and c in ['"', "'"]:
             inquotes = not inquotes
             continue
+        if not backslashed and c == '(':
+            inparens = True
+            continue
+        if not backslashed and c == ')':
+            output = subprocess.Popen(parse(word), stdout=subprocess.PIPE).stdout.read()
+            if output[-1] == 10: #newline
+                result.append(output[:-1])
+            else:
+                result.append(output)
+            inparens = False
+            word=''
+            continue
         if not backslashed and c == ' ':
-            if inquotes:
+            if inquotes or inparens:
                 word += c
             else:
-                result.append(word)
+                if len(word) > 0:
+                    result.append(word)
                 word = ''
         else:
             word += c
@@ -120,7 +131,7 @@ builtins = {
 def process(line):
     """ Process a command line. """
     line = parse(line)
-    if line[0] == '':
+    if not line:
         return
 
     # If the first word on the command line equals the name of a shell
