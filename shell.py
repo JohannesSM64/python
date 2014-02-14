@@ -5,7 +5,8 @@
 historical baggage. It is hence not compliant with POSIX sh. """
 
 # Current features are:
-# - A basic parser which understands spaces, quotes and backslashes
+# - A basic parser which understands spaces, quotes, backslashes and
+# comments
 # - Directory changing with cd, and directory history "undo" and
 # "redo" with cdu and cdr
 
@@ -46,6 +47,8 @@ def parse(line):
         if c == '\\':
             backslashed = True
             continue
+        if not backslashed and c == '#':
+            break
         if not backslashed and c in ['"', "'"]:
             inquotes = not inquotes
             continue
@@ -58,7 +61,9 @@ def parse(line):
         else:
             word += c
         backslashed = False
-    result.append(word)
+
+    if len(word) > 0:
+        result.append(word)
     return result
 
 # Used later for cd history.
