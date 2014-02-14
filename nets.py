@@ -23,19 +23,16 @@ def open_site(kw, term):
 if __name__ == '__main__':
     import os
 
-    def available_sites():
+    def error(text):
+        print(text)
         print('Available sites:')
         for i in sitedict:
             print('* {}: {}'.format(i, sitedict[i]))
-
-    if not sys.argv[2:]:
-        print('Usage: {} site term'.format(os.path.basename(sys.argv[0])))
-        available_sites()
         sys.exit(1)
 
-    try:
-        open_site(sys.argv[1], sys.argv[2])
-    except KeyError:
-        print('No such site in sitedict: {}'.format(sys.argv[1]))
-        available_sites()
-        sys.exit(1)
+    if len(sys.argv) < 3:
+        error('Usage: {} site term'.format(os.path.basename(sys.argv[0])))
+    elif not sys.argv[1] in sitedict:
+        error('No such site in sitedict: {}'.format(sys.argv[1]))
+
+    open_site(sys.argv[1], sys.argv[2])
