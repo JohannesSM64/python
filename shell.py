@@ -5,92 +5,37 @@
 historical baggage. It is hence not compliant with POSIX sh. """
 
 # Current features are:
-# - A basic parser which understands spaces, quotes, backslashes and
-# comments
-# - Directory changing with cd, and directory history "undo" and
-# "redo" with cdu and cdr
+# - Multi-word arguments with '"
+# - Escaping characters with \
+# - Comments with #
+# - Directory changing with cd
+# - cd history undo and redo with cdu and cdr
 
 # TODO:
 # - Piping with |
+# - Globbing with *
 
 # Written by Johannes Langøy, 2010. Public domain.
 # Updated 2014.
 
-import re
 import os
-import sys
+import readline
 import subprocess
 
-def get_cmdline(prompt):
-    """ Get and return command line from stdin, using prompt if
-    interactive. """
-    try:
-        if sys.stdin.isatty():
-            cmdline = input(prompt)
-        else:
-            cmdline = input()
-    except EOFError:
-        sys.exit()
-    return cmdline
-
-def parse(line):
-    """ Split an input line into a list of arguments. """
-    result = []
-    word = ''
-    inquotes = False
-    inparens = False
-    backslashed = False
-
-    for c in line:
-        if c == '\\':
-            backslashed = True
-            continue
-        if not backslashed and c == '#':
-            break
-        if not backslashed and c in ['"', "'"]:
-            inquotes = not inquotes
-            continue
-        if not backslashed and c == '(':
-            inparens = True
-            continue
-        if not backslashed and c == ')':
-            output = subprocess.Popen(parse(word), stdout=subprocess.PIPE).stdout.read()
-            if output[-1] == 10: #newline
-                result.append(output[:-1])
-            else:
-                result.append(output)
-            inparens = False
-            word=''
-            continue
-        if not backslashed and c == ' ':
-            if inquotes or inparens:
-                word += c
-            else:
-                if len(word) > 0:
-                    result.append(word)
-                word = ''
-        else:
-            word += c
-        backslashed = False
-
-    if len(word) > 0:
-        result.append(word)
-    return result
-
-# Used later for cd history.
+# Used for cd history.
 earlierdirs = []
 laterdirs   = []
 
 def cd(dir=None):
     """ Change directory. Defaults to the home directory. """
     earlierdirs.append(os.getcwd())
-    if dir:
-        try:
+    try:
+        if dir:
             os.chdir(dir)
-        except OSError as inst:
-            print('cd: {0}'.format(inst))
-    else:
-        os.chdir(os.path.expanduser('~'))
+        else:
+            os.chdir(os.getenv('HOME'))
+    except OSError as inst:
+        print('cd: {0}'.format(inst))
 
 def cdu():
     """ cd "undo"; go to previous working directory in history. """
@@ -128,6 +73,37 @@ builtins = {
     'set': setvar
 }
 
+def parse(line):
+    """ Split an input line into a list of arguments. """
+    result = []
+    acc = ''
+    inquotes = False
+    backslashed = False
+
+    for c in line:
+        if c == '\\':
+            backslashed = True
+            continue
+        if not backslashed and c == '#':
+            break
+        if not backslashed and c in ['"', "'"]:
+            inquotes = not inquotes
+            continue
+        if not backslashed and c == ' ':
+            if inquotes:
+                acc += c
+            else:
+                if len(acc) > 0:
+                    result.append(acc)
+                acc = ''
+        else:
+            acc += c
+        backslashed = False
+
+    if len(acc) > 0:
+        result.append(acc)
+    return result
+
 def process(line):
     """ Process a command line. """
     line = parse(line)
@@ -146,15 +122,14 @@ def process(line):
             print('shell: {0}'.format(inst))
 
 def main():
-    # Put arguments into the env.
-    for i, s in enumerate(sys.argv):
-        os.environ[str(i)] = s
-
     while True:
         try:
-            cmdline = get_cmdline(os.getenv('PROMPT') or '@ ')
-            process(cmdline)
+            process(input('@ '))
+        except EOFError:
+            print()
+            break
         except KeyboardInterrupt:
+            print()
             continue
 
 if __name__ == '__main__':
