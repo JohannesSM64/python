@@ -5,7 +5,7 @@
 historical baggage. It is hence not compliant with POSIX sh. """
 
 # Current features are:
-# - Basic line editing and file name completion (readline)
+# - Basic line editing, history and file name completion (readline)
 # - Multi-word arguments with '"
 # - Escape the next character with \
 # - Comment until EOL with #
@@ -92,7 +92,7 @@ def parse(line):
         if not backslashed and c in ['"', "'"]:
             inquotes = not inquotes
             continue
-        if not backslashed and c == ' ':
+        if not backslashed and c in [' ', '\t']:
             if inquotes:
                 acc += c
             else:
