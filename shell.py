@@ -5,9 +5,10 @@
 historical baggage. It is hence not compliant with POSIX sh. """
 
 # Current features are:
+# - Basic line editing and file name completion (readline)
 # - Multi-word arguments with '"
-# - Escaping characters with \
-# - Comments with #
+# - Escape the next character with \
+# - Comment until EOL with #
 # - Directory changing with cd
 # - cd history undo and redo with cdu and cdr
 
@@ -22,9 +23,7 @@ import os
 import readline
 import subprocess
 
-# Used for cd history.
-earlierdirs = []
-laterdirs   = []
+readline.parse_and_bind('tab: complete')
 
 def cd(dir=None):
     """ Change directory. Defaults to the home directory. """
@@ -36,6 +35,10 @@ def cd(dir=None):
             os.chdir(os.getenv('HOME'))
     except OSError as inst:
         print('cd: {0}'.format(inst))
+
+# Used for cd history.
+earlierdirs = []
+laterdirs   = []
 
 def cdu():
     """ cd "undo"; go to previous working directory in history. """
