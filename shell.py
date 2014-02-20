@@ -11,9 +11,9 @@ historical baggage. It is hence not compliant with POSIX sh. """
 # - Comment until EOL with #
 # - Directory changing with cd
 # - cd history undo and redo with cdu and cdr
+# - Piping with |
 
 # TODO:
-# - Piping with |
 # - Globbing with *
 
 # Written by Johannes Langøy, 2010. Public domain.
@@ -79,50 +79,67 @@ builtins = {
 def parse(line):
     """ Split an input line into a list of arguments. """
     result = []
+    part = []
     acc = ''
     inquotes = False
     backslashed = False
 
     for c in line:
         if c == '\\':
-            backslashed = True
-            continue
-        if not backslashed and c == '#':
+            if backslashed:
+                acc += c
+            else:
+                backslashed = True
+                continue
+        elif not backslashed and not inquotes and c == '#':
             break
-        if not backslashed and c in ['"', "'"]:
+        elif not backslashed and not inquotes and c == '|':
+            if len(acc) > 0:
+                part.append(acc)
+            acc = ''
+            result.append(part)
+            part = []
+        elif not backslashed and c in ['"', "'"]:
             inquotes = not inquotes
             continue
-        if not backslashed and c in [' ', '\t']:
+        elif not backslashed and c in [' ', '\t']:
             if inquotes:
                 acc += c
             else:
                 if len(acc) > 0:
-                    result.append(acc)
+                    part.append(acc)
                 acc = ''
         else:
             acc += c
         backslashed = False
 
     if len(acc) > 0:
-        result.append(acc)
+        part.append(acc)
+    if len(part) > 0:
+        result.append(part)
     return result
 
 def process(line):
     """ Process a command line. """
-    line = parse(line)
-    if not line:
+    parsed = parse(line)
+    if not parsed:
         return
 
-    # If the first word on the command line equals the name of a shell
-    # builtin, call it with the args provided. If not, execute it as an
-    # external command with the args provided.
-    if line[0] in builtins:
-        builtins[line[0]](*line[1:])
-    else:
-        try:
-            subprocess.call(line)
-        except OSError as inst:
-            print('shell: {0}'.format(inst))
+    def handle_parts(parts, pipe):
+        if len(parts) == 1:
+            if pipe:
+                subprocess.call(parts[0], stdin=pipe.stdout)
+            else:
+                subprocess.call(parts[0])
+        else:
+            if pipe:
+                pipe = subprocess.Popen(parts[0], stdout=-1,
+                                        stdin=pipe.stdout)
+            else:
+                pipe = subprocess.Popen(parts[0], stdout=-1)
+            handle_parts(parts[1:], pipe)
+
+    handle_parts(parsed, None)
 
 def main():
     while True:
