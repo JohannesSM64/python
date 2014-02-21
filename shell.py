@@ -12,14 +12,13 @@ historical baggage. It is hence not compliant with POSIX sh. """
 # - Directory changing with cd
 # - cd history undo and redo with cdu and cdr
 # - Piping with |
-
-# TODO:
-# - Globbing with *
+# - Globbing with * ? [ ]
 
 # Written by Johannes Langøy, 2010. Public domain.
 # Updated 2014.
 
 import os
+from fnmatch import fnmatch
 import readline
 import subprocess
 
@@ -77,12 +76,14 @@ builtins = {
 }
 
 def parse(line):
-    """ Split an input line into a list of arguments. """
+    """ Return a list of lists, each list consisting of a command name
+    and its arguments. Split on pipe characters. """
     result = []
     part = []
     acc = ''
     inquotes = False
     backslashed = False
+    globbing = False
 
     for c in line:
         if c == '\\':
@@ -91,11 +92,19 @@ def parse(line):
             else:
                 backslashed = True
                 continue
+        elif not backslashed and not inquotes and c in ['*','?','[',']']:
+            globbing = True
+            acc += c
         elif not backslashed and not inquotes and c == '#':
             break
         elif not backslashed and not inquotes and c == '|':
             if len(acc) > 0:
-                part.append(acc)
+                if globbing:
+                    globbing = False
+                    part.extend(sorted([f for f in os.listdir() if
+                                        fnmatch(f, acc)]))
+                else:
+                    part.append(acc)
             acc = ''
             result.append(part)
             part = []
@@ -107,14 +116,25 @@ def parse(line):
                 acc += c
             else:
                 if len(acc) > 0:
-                    part.append(acc)
+                    if globbing:
+                        globbing = False
+                        part.extend(sorted([f for f in os.listdir() if
+                                            fnmatch(f, acc)]))
+                    else:
+                        part.append(acc)
                 acc = ''
         else:
             acc += c
         backslashed = False
 
     if len(acc) > 0:
-        part.append(acc)
+        if globbing:
+            globbing = False
+            part.extend(sorted([f for f in os.listdir() if
+                                fnmatch(f, acc)]))
+        else:
+            part.append(acc)
+    acc = ''
     if len(part) > 0:
         result.append(part)
     return result
