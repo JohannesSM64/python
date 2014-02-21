@@ -139,7 +139,13 @@ def process(line):
                 pipe = subprocess.Popen(parts[0], stdout=-1)
             handle_parts(parts[1:], pipe)
 
-    handle_parts(parsed, None)
+    if parsed[0][0] in builtins:
+        builtins[parsed[0][0]](*parsed[0][1:])
+    else:
+        try:
+            handle_parts(parsed, None)
+        except OSError as inst:
+            print("shell: {}".format(inst))
 
 def main():
     while True:
