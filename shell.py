@@ -17,6 +17,12 @@ historical baggage. It is hence not compliant with POSIX sh. """
 # - Piping with |
 # - Globbing with * ? [ ]
 
+# Ideas:
+# - Redirect output with > and 2>
+# - Multiple commands with ; and maybe &&
+# - Run command in background with &
+# - Pass input from file with <
+
 # Written by Johannes Langøy, 2010. Public domain.
 # Updated 2014.
 
