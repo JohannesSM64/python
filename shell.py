@@ -10,6 +10,7 @@ historical baggage. It is hence not compliant with POSIX sh. """
 # - cd history undo and redo with cdu and cdr
 # - Access environment variables with get and set
 # - Define and view aliases with alias
+# - Startup commands read from config file
 # - Multi-word arguments with '"
 # - Escape the next character with \
 # - Comment until EOL with #
@@ -24,6 +25,8 @@ import os
 from glob import glob
 import readline
 import subprocess
+
+config = os.path.expanduser('~/.shellrc')
 
 readline.parse_and_bind('tab: complete')
 
@@ -81,10 +84,10 @@ def alias(name=None, *val):
             try:
                 print(aliases[name])
             except KeyError:
-                print("shell: no such alias.")
+                print('shell: no such alias.')
     else:
         for i in aliases:
-            print("{}: {}".format(i, aliases[i]))
+            print('{}: {}'.format(i, aliases[i]))
 
 builtins = {
     'cd' : cd,
@@ -126,13 +129,14 @@ def parse(line):
                     if files:
                         part.extend(files)
                     else:
-                        print("shell: no matches found: {}".format(acc))
+                        print('shell: no matches found: {}'.format(acc))
                         return []
                 else:
                     part.append(acc)
                 acc = ''
             # }}}
-            result.append(part)
+            if len(part) > 0:
+                result.append(part)
             part = []
         elif not backslashed and c in ['"',"'"]:
             inquotes = not inquotes
@@ -149,7 +153,7 @@ def parse(line):
                         if files:
                             part.extend(files)
                         else:
-                            print("shell: no matches found: {}".format(acc))
+                            print('shell: no matches found: {}'.format(acc))
                             return []
                     else:
                         part.append(acc)
@@ -167,7 +171,7 @@ def parse(line):
             if files:
                 part.extend(files)
             else:
-                print("shell: no matches found: {}".format(acc))
+                print('shell: no matches found: {}'.format(acc))
                 return []
         else:
             part.append(acc)
@@ -175,6 +179,10 @@ def parse(line):
     # }}}
     if len(part) > 0:
         result.append(part)
+
+    if inquotes:
+        print('shell: closing quote mark missing.')
+        return []
 
     # Expand aliases.
     for part in result:
@@ -213,6 +221,14 @@ def process(line):
 
 def main():
     os.environ['SHELL'] = 'sh' # workaround for a strange python issue
+
+    if os.path.exists(config):
+        with open(config) as f:
+            for line in f.readlines():
+                line = line.rstrip()
+                if line: # nonblank
+                    process(line)
+
     while True:
         try:
             process(input('@ '))
