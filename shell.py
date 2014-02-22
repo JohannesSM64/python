@@ -6,11 +6,12 @@ historical baggage. It is hence not compliant with POSIX sh. """
 
 # Current features are:
 # - Basic line editing, history and file name completion (readline)
+# - Directory changing with cd
+# - cd history undo and redo with cdu and cdr
+# - Access environment variables with get and set
 # - Multi-word arguments with '"
 # - Escape the next character with \
 # - Comment until EOL with #
-# - Directory changing with cd
-# - cd history undo and redo with cdu and cdr
 # - Piping with |
 # - Globbing with * ? [ ]
 
@@ -18,7 +19,7 @@ historical baggage. It is hence not compliant with POSIX sh. """
 # Updated 2014.
 
 import os
-from fnmatch import fnmatch
+from glob import glob
 import readline
 import subprocess
 
@@ -76,8 +77,8 @@ builtins = {
 }
 
 def parse(line):
-    """ Return a list of lists, each list consisting of a command name
-    and its arguments. Split on pipe characters. """
+    """ Take an input line and return a list of commands, each element
+    a list consisting of command name and arguments. """
     result = []
     part = []
     acc = ''
@@ -98,43 +99,61 @@ def parse(line):
         elif not backslashed and not inquotes and c == '#':
             break
         elif not backslashed and not inquotes and c == '|':
+            #-- Begin duplicated code
             if len(acc) > 0:
                 if globbing:
                     globbing = False
-                    part.extend(sorted([f for f in os.listdir() if
-                                        fnmatch(f, acc)]))
+                    files = sorted(glob(acc))
+                    if files:
+                        part.extend(files)
+                    else:
+                        print("shell: no matches found: {}".format(acc))
+                        return []
                 else:
                     part.append(acc)
-            acc = ''
+                acc = ''
+            #-- End duplicated code
             result.append(part)
             part = []
-        elif not backslashed and c in ['"', "'"]:
+        elif not backslashed and c in ['"',"'"]:
             inquotes = not inquotes
             continue
-        elif not backslashed and c in [' ', '\t']:
+        elif not backslashed and c in [' ','\t']:
             if inquotes:
                 acc += c
             else:
+                #-- Begin duplicated code
                 if len(acc) > 0:
                     if globbing:
                         globbing = False
-                        part.extend(sorted([f for f in os.listdir() if
-                                            fnmatch(f, acc)]))
+                        files = sorted(glob(acc))
+                        if files:
+                            part.extend(files)
+                        else:
+                            print("shell: no matches found: {}".format(acc))
+                            return []
                     else:
                         part.append(acc)
-                acc = ''
+                    acc = ''
+                #-- End duplicated code
         else:
             acc += c
         backslashed = False
 
+    #-- Begin duplicated code
     if len(acc) > 0:
         if globbing:
             globbing = False
-            part.extend(sorted([f for f in os.listdir() if
-                                fnmatch(f, acc)]))
+            files = sorted(glob(acc))
+            if files:
+                part.extend(files)
+            else:
+                print("shell: no matches found: {}".format(acc))
+                return []
         else:
             part.append(acc)
-    acc = ''
+        acc = ''
+    #-- End duplicated code
     if len(part) > 0:
         result.append(part)
     return result
@@ -165,9 +184,10 @@ def process(line):
         try:
             handle_parts(parsed, None)
         except OSError as inst:
-            print("shell: {}".format(inst))
+            print('shell: {}'.format(inst))
 
 def main():
+    os.environ['SHELL'] = 'shell.py'
     while True:
         try:
             process(input('@ '))
