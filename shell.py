@@ -4,7 +4,7 @@
 """ A command shell implementation that aims to be simple and free of
 historical baggage. It is hence not compliant with POSIX sh. """
 
-# Current features are:
+# Current features:
 # - Basic line editing, history and file name completion (readline)
 # - Directory changing with cd
 # - cd history undo and redo with cdu and cdr
@@ -99,7 +99,7 @@ def parse(line):
         elif not backslashed and not inquotes and c == '#':
             break
         elif not backslashed and not inquotes and c == '|':
-            #-- Begin duplicated code
+            # Add-handler code {{{
             if len(acc) > 0:
                 if globbing:
                     globbing = False
@@ -112,7 +112,7 @@ def parse(line):
                 else:
                     part.append(acc)
                 acc = ''
-            #-- End duplicated code
+            # }}}
             result.append(part)
             part = []
         elif not backslashed and c in ['"',"'"]:
@@ -122,7 +122,7 @@ def parse(line):
             if inquotes:
                 acc += c
             else:
-                #-- Begin duplicated code
+                # Add-handler code {{{
                 if len(acc) > 0:
                     if globbing:
                         globbing = False
@@ -135,12 +135,12 @@ def parse(line):
                     else:
                         part.append(acc)
                     acc = ''
-                #-- End duplicated code
+                #-- }}}
         else:
             acc += c
         backslashed = False
 
-    #-- Begin duplicated code
+    # Add-handler code {{{
     if len(acc) > 0:
         if globbing:
             globbing = False
@@ -153,7 +153,7 @@ def parse(line):
         else:
             part.append(acc)
         acc = ''
-    #-- End duplicated code
+    # }}}
     if len(part) > 0:
         result.append(part)
     return result
