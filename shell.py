@@ -9,6 +9,7 @@ historical baggage. It is hence not compliant with POSIX sh. """
 # - Directory changing with cd
 # - cd history undo and redo with cdu and cdr
 # - Access environment variables with get and set
+# - Define and view aliases with alias
 # - Multi-word arguments with '"
 # - Escape the next character with \
 # - Comment until EOL with #
@@ -18,6 +19,7 @@ historical baggage. It is hence not compliant with POSIX sh. """
 # Written by Johannes Langøy, 2010. Public domain.
 # Updated 2014.
 
+from utils import *
 import os
 from glob import glob
 import readline
@@ -25,7 +27,11 @@ import subprocess
 
 readline.parse_and_bind('tab: complete')
 
-def cd(dir=None):
+earlierdirs = []
+laterdirs = []
+aliases = {}
+
+def cd(dir=None, *ignore):
     """ Change directory. Defaults to the home directory. """
     earlierdirs.append(os.getcwd())
     try:
@@ -36,11 +42,7 @@ def cd(dir=None):
     except OSError as inst:
         print('cd: {0}'.format(inst))
 
-# Used for cd history.
-earlierdirs = []
-laterdirs   = []
-
-def cdu():
+def cdu(*ignore):
     """ cd "undo"; go to previous working directory in history. """
     if not earlierdirs:
         print('cd: no further undo history.')
@@ -50,7 +52,7 @@ def cdu():
         print(mydir)
         cd(mydir)
 
-def cdr():
+def cdr(*ignore):
     """ cd "redo"; go to next working directory in history. """
     if not laterdirs:
         print('cd: no further redo history.')
@@ -60,20 +62,37 @@ def cdr():
         print(mydir)
         cd(mydir)
 
-def getvar(arg):
+def getvar(arg=None, *ignore):
     """ Get an environment variable. """
-    print(os.getenv(arg))
+    if arg:
+        print(os.getenv(arg))
 
-def setvar(var, val):
+def setvar(var=None, val=None, *ignore):
     """ Set an environment variable. """
-    os.environ[var] = val
+    if var and val:
+        os.environ[var] = val
+
+def alias(name=None, *val):
+    """ Interface to aliases. """
+    if name:
+        if val:
+            aliases[name] = val
+        else:
+            try:
+                print(aliases[name])
+            except KeyError:
+                print("shell: no such alias.")
+    else:
+        for i in aliases:
+            print("{}: {}".format(i, aliases[i]))
 
 builtins = {
     'cd' : cd,
     'cdu': cdu,
     'cdr': cdr,
     'get': getvar,
-    'set': setvar
+    'set': setvar,
+    'alias': alias
 }
 
 def parse(line):
@@ -156,6 +175,12 @@ def parse(line):
     # }}}
     if len(part) > 0:
         result.append(part)
+
+    # Expand aliases.
+    for part in result:
+        if part[0] in aliases:
+            exert(aliases[part.pop(0)], part, 0)
+
     return result
 
 def process(line):
@@ -187,7 +212,7 @@ def process(line):
             print('shell: {}'.format(inst))
 
 def main():
-    os.environ['SHELL'] = 'shell.py'
+    os.environ['SHELL'] = 'sh' # workaround for a strange python issue
     while True:
         try:
             process(input('@ '))
