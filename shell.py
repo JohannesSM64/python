@@ -10,7 +10,7 @@ historical baggage. It is hence not compliant with POSIX sh. """
 # - cd history undo and redo with cdu and cdr
 # - Access environment variables with get and set
 # - Define and view aliases with alias
-# - Startup commands read from config file
+# - Startup commands are read from config file
 # - Multi-word arguments with '"
 # - Escape the next character with \
 # - Comment until EOL with #
