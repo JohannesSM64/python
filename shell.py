@@ -14,20 +14,22 @@ historical baggage. It is hence not compliant with POSIX sh. """
 # - Multi-word arguments with '"
 # - Escape the next character with \
 # - Comment until EOL with #
+# - Multiple commands with ;
 # - Piping with |
-# - Globbing with * ? [ ]
 
 # Ideas:
 # - Redirect output with > and 2>
-# - Multiple commands with ; and maybe &&
-# - Run command in background with &
 # - Pass input from file with <
+# - Run command in background with &
+# - Conditionals (&& and ||)
+# - Globbing with * ? [ ]
 
 # Written by Johannes Langøy, 2010. Public domain.
 # Updated 2014.
 
 from utils import *
 import os
+import sys
 from glob import glob
 import readline
 import subprocess
@@ -85,6 +87,7 @@ def alias(name=None, *val):
     """ Interface to aliases. """
     if name:
         if val:
+            print(val)
             aliases[name] = val
         else:
             try:
@@ -105,120 +108,108 @@ builtins = {
 }
 
 def parse(line):
-    """ Take an input line and return a list of commands, each element
-    a list consisting of command name and arguments. """
-    result = []
-    part = []
     acc = ''
-    inquotes = False
-    backslashed = False
-    globbing = False
+    cmd = []
+    result = []
+    quoted = False
+    escaped = False
+    endacc = False
+    endcmd = False
+    endloop = False
+    infile = False
+    outfile = False
+    glob = False
+    count = 0
+    lastchar = len(line)-1
 
-    for c in line:
-        if c == '\\':
-            if backslashed:
+    for count, c in enumerate(line):
+        if c == '#':
+            endloop = True
+        elif c == '\\':
+            if escaped:
                 acc += c
             else:
-                backslashed = True
+                escaped = True
                 continue
-        elif not backslashed and not inquotes and c in ['*','?','[',']']:
-            globbing = True
+        elif c == "'" and not escaped:
+            quoted = not quoted
+        elif c in [' ','\t'] and not True in (quoted, escaped):
+            endacc = True
+        elif c == ';' and not True in (quoted, escaped):
+            endacc = True
+            endcmd = True
+        elif c == '|' and not True in (quoted, escaped):
+            endacc = True
+            endcmd = True
+            outfile = True
+        else:
             acc += c
-        elif not backslashed and not inquotes and c == '#':
+
+        if count == lastchar:
+            endloop = True
+        if endloop:
+            endacc = True
+            endcmd = True
+        if endacc and acc:
+            cmd.append(acc)
+            acc = ''
+        if endcmd and cmd:
+            if result and result[-1][2] == True: # outfile for last
+                infile = True
+            else:
+                infile = False
+            result.append((cmd, infile, outfile))
+            cmd = []
+        if endloop:
             break
-        elif not backslashed and not inquotes and c == '|':
-            # Add-handler code {{{
-            if len(acc) > 0:
-                if globbing:
-                    globbing = False
-                    files = sorted(glob(acc))
-                    if files:
-                        part.extend(files)
-                    else:
-                        print('shell: no matches found: {}'.format(acc))
-                        return []
-                else:
-                    part.append(acc)
-                acc = ''
-            # }}}
-            if len(part) > 0:
-                result.append(part)
-            part = []
-        elif not backslashed and c in ['"',"'"]:
-            inquotes = not inquotes
-            continue
-        elif not backslashed and c in [' ','\t']:
-            if inquotes:
-                acc += c
-            else:
-                # Add-handler code {{{
-                if len(acc) > 0:
-                    if globbing:
-                        globbing = False
-                        files = sorted(glob(acc))
-                        if files:
-                            part.extend(files)
-                        else:
-                            print('shell: no matches found: {}'.format(acc))
-                            return []
-                    else:
-                        part.append(acc)
-                    acc = ''
-                #-- }}}
-        else:
-            acc += c
-        backslashed = False
+        escaped = False
+        endacc = False
+        endcmd = False
+        infile = False
+        outfile = False
 
-    # Add-handler code {{{
-    if len(acc) > 0:
-        if globbing:
-            globbing = False
-            files = sorted(glob(acc))
-            if files:
-                part.extend(files)
-            else:
-                print('shell: no matches found: {}'.format(acc))
-                return []
-        else:
-            part.append(acc)
-        acc = ''
-    # }}}
-    if len(part) > 0:
-        result.append(part)
+    if quoted:
+        print('shell: unclosed quotation.')
+        return None
 
-    if inquotes:
-        print('shell: closing quote mark missing.')
-        return []
-
-    # Expand aliases.
-    for part in result:
-        if part[0] in aliases:
-            exert(aliases[part.pop(0)], part, 0)
+    for cmd in result:
+        if cmd[0][0] in aliases:
+            exert(aliases[cmd[0].pop(0)], cmd[0], 0)
 
     return result
 
-def process(line):
+def process(parsed):
     """ Process a command line. """
-    parsed = parse(line)
-    if not parsed:
-        return
+    def handle_parts(parts, last):
+        func = subprocess.call
+        cmd = parts[0][0]
+        infile = parts[0][1]
+        outfile = parts[0][2]
 
-    def handle_parts(parts, pipe):
-        if len(parts) == 1:
-            if pipe:
-                subprocess.call(parts[0], stdin=pipe.stdout)
-            else:
-                subprocess.call(parts[0])
+        ## Input file
+        if infile == True:
+            infile = last.stdout
+        elif infile == False:
+            infile = sys.stdin
         else:
-            if pipe:
-                pipe = subprocess.Popen(parts[0], stdout=-1,
-                                        stdin=pipe.stdout)
-            else:
-                pipe = subprocess.Popen(parts[0], stdout=-1)
-            handle_parts(parts[1:], pipe)
+            infile = open(infile)
 
-    if parsed[0][0] in builtins:
-        builtins[parsed[0][0]](*parsed[0][1:])
+        ## Output file
+        if outfile == True:
+            outfile = subprocess.PIPE
+            func = subprocess.Popen
+        elif outfile == False:
+            outfile = sys.stdout
+        else:
+            outfile = open(outfile)
+
+        ## Run
+        last = func(cmd, stdin=infile, stdout=outfile)
+        if len(parts) > 1:
+            handle_parts(parts[1:], last)
+
+    if parsed[0][0][0] in builtins:
+        builtins[parsed[0][0][0]](*parsed[0][0][1:])
     else:
         try:
             handle_parts(parsed, None)
@@ -233,11 +224,13 @@ def main():
             for line in f.readlines():
                 line = line.rstrip()
                 if line: # nonblank
-                    process(line)
+                    process(parse(line))
 
     while True:
         try:
-            process(input('@ '))
+            line = input('@ ')
+            if line:
+                process(parse(line))
         except EOFError:
             print()
             break
