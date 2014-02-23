@@ -90,7 +90,6 @@ def alias(name=None, *val):
     """ Interface to aliases. """
     if name:
         if val:
-            print(val)
             aliases[name] = val
         else:
             try:
