@@ -86,11 +86,11 @@ def setvar(var=None, val=None, *ignore):
     if var and val:
         os.environ[var] = val
 
-def alias(name=None, *val):
+def alias(name=None, line=None, *ignore):
     """ Interface to aliases. """
     if name:
-        if val:
-            aliases[name] = val
+        if line:
+            aliases[name] = line
         else:
             try:
                 print(aliases[name])
@@ -173,10 +173,6 @@ def parse(line):
     if quoted:
         print('shell: unclosed quotation.')
         return None
-
-    for cmd in result:
-        if cmd[0][0] in aliases:
-            exert(aliases[cmd[0].pop(0)], cmd[0], 0)
 
     return result
 
