@@ -158,8 +158,6 @@ def parse(line):
         if endcmd and cmd:
             if result and result[-1][2] == True: # outfile for last
                 infile = True
-            else:
-                infile = False
             result.append((cmd, infile, outfile))
             cmd = []
         if endloop:
