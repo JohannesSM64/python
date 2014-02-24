@@ -17,9 +17,6 @@ historical baggage. It is hence not compliant with POSIX sh. """
 # - Multiple commands with ;
 # - Piping with |
 
-# TODO:
-# - Fix aliases
-
 # Ideas:
 # - Redirect output with > and 2>
 # - Pass input from file with <
@@ -36,6 +33,7 @@ import sys
 from glob import glob
 import readline
 import subprocess
+import copy
 
 config = os.path.expanduser('~/.shellrc')
 
@@ -90,7 +88,7 @@ def alias(name=None, line=None, *ignore):
     """ Interface to aliases. """
     if name:
         if line:
-            aliases[name] = line
+            aliases[name] = parse(line)
         else:
             try:
                 print(aliases[name])
@@ -111,9 +109,7 @@ builtins = {
 
 def parse(line):
     acc = ''
-    cmd = []
-    infile = False
-    outfile = False
+    cmd = [[], False, False]
     result = []
     quoted = False
     escaped = False
@@ -121,6 +117,7 @@ def parse(line):
     endacc = False
     endcmd = False
     endloop = False
+    firstword = True
     count = 0
     lastchar = len(line)-1
 
@@ -143,7 +140,7 @@ def parse(line):
         elif c == '|' and not True in (quoted, escaped):
             endacc = True
             endcmd = True
-            outfile = True
+            cmd[2] = True
         else:
             acc += c
 
@@ -153,20 +150,24 @@ def parse(line):
             endacc = True
             endcmd = True
         if endacc and acc:
-            cmd.append(acc)
+            if firstword and acc in aliases:
+                exert(aliases[acc][:-1], result, 0)
+                cmd = copy.deepcopy(aliases[acc][-1])
+            else:
+                cmd[0].append(acc)
             acc = ''
-        if endcmd and cmd:
-            if result and result[-1][2] == True: # outfile for last
-                infile = True
-            result.append((cmd, infile, outfile))
-            cmd = []
+            firstword = False
+        if endcmd and cmd[0]:
+            if result and result[-1][2] == True:
+                cmd[1] = True
+            result.append(cmd)
+            cmd = [[], False, False]
+            firstword = True
         if endloop:
             break
         escaped = False
         endacc = False
         endcmd = False
-        infile = False
-        outfile = False
 
     if quoted:
         print('shell: unclosed quotation.')
