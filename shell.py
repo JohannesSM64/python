@@ -112,15 +112,15 @@ builtins = {
 def parse(line):
     acc = ''
     cmd = []
+    infile = False
+    outfile = False
     result = []
     quoted = False
     escaped = False
+    glob = False
     endacc = False
     endcmd = False
     endloop = False
-    infile = False
-    outfile = False
-    glob = False
     count = 0
     lastchar = len(line)-1
 
