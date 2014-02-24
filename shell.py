@@ -18,7 +18,7 @@ historical baggage. It is hence not compliant with POSIX sh. """
 # - Piping with |
 
 # TODO:
-# - Fix aliases: support ;|
+# - Fix aliases
 
 # Ideas:
 # - Redirect output with > and 2>
