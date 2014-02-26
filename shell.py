@@ -186,7 +186,6 @@ def parse(line):
     return result
 
 def process(parsed):
-    """ Process a command line. """
     def handle_parts(parts, last):
         func = subprocess.call
         cmd = parts[0][0]
