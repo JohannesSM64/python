@@ -44,9 +44,7 @@ earlierdirs = []
 laterdirs = []
 aliases = {}
 
-def cd(dir=None, *ignore):
-    """ Change directory. Defaults to the home directory. """
-    earlierdirs.append(os.getcwd())
+def cd_helper(dir):
     try:
         if dir:
             os.chdir(dir)
@@ -54,6 +52,11 @@ def cd(dir=None, *ignore):
             os.chdir(os.getenv('HOME'))
     except OSError as inst:
         print('cd: {0}'.format(inst))
+
+def cd(dir=None, *ignore):
+    """ Change directory. Defaults to the home directory. """
+    earlierdirs.append(os.getcwd())
+    cd_helper(dir)
 
 def cdu(*ignore):
     """ cd "undo"; go to previous working directory in history. """
@@ -63,7 +66,7 @@ def cdu(*ignore):
         laterdirs.append(os.getcwd())
         mydir = earlierdirs.pop()
         print(mydir)
-        cd(mydir)
+        cd_helper(mydir)
 
 def cdr(*ignore):
     """ cd "redo"; go to next working directory in history. """
@@ -73,7 +76,7 @@ def cdr(*ignore):
         earlierdirs.append(os.getcwd())
         mydir = laterdirs.pop()
         print(mydir)
-        cd(mydir)
+        cd_helper(mydir)
 
 def getvar(arg=None, *ignore):
     """ Get an environment variable. """
