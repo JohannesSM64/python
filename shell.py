@@ -213,7 +213,8 @@ def process(parsed):
 
     if parsed[0][0][0] in builtins:
         builtins[parsed[0][0][0]](*parsed[0][0][1:])
-    else:
+        parsed = parsed[1:]
+    if parsed:
         try:
             handle_parts(parsed, None)
         except OSError as inst:
@@ -231,9 +232,9 @@ def main():
 
     while True:
         try:
-            line = input('@ ')
-            if line:
-                process(parse(line))
+            parsed = parse(input('@ '))
+            if parsed:
+                process(parsed)
         except EOFError:
             print()
             break
