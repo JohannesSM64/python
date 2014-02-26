@@ -16,13 +16,14 @@ historical baggage. It is hence not compliant with POSIX sh. """
 # - Comment until EOL with #
 # - Multiple commands with ;
 # - Piping with |
+# - Globbing with * ? [ ]
 
 # Ideas:
 # - Redirect output with > and 2>
 # - Pass input from file with <
 # - Run command in background with &
 # - Conditionals (&& and ||)
-# - Globbing with * ? [ ]
+# - Better completion: command names and files in other directories
 
 # Written by Johannes Langøy, 2010. Public domain.
 # Updated 2014.
