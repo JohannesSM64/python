@@ -113,7 +113,7 @@ def parse(line):
     result = []
     quoted = False
     escaped = False
-    glob = False
+    globbing = False
     endacc = False
     endcmd = False
     endloop = False
@@ -130,10 +130,13 @@ def parse(line):
             else:
                 escaped = True
                 continue
-        elif c == "'" and not escaped:
+        elif c in ["'",'"'] and not escaped:
             quoted = not quoted
         elif c in [' ','\t'] and not True in (quoted, escaped):
             endacc = True
+        elif c in ['*','?','[',']'] and not True in (quoted, escaped):
+            globbing = True
+            acc += c
         elif c == ';' and not True in (quoted, escaped):
             endacc = True
             endcmd = True
@@ -150,13 +153,16 @@ def parse(line):
             endacc = True
             endcmd = True
         if endacc and acc:
-            if firstword and acc in aliases:
+            if globbing:
+                cmd[0].extend(sorted(glob(acc)))
+            elif firstword and acc in aliases:
                 exert(aliases[acc][:-1], result, 0)
                 cmd = copy.deepcopy(aliases[acc][-1])
             else:
                 cmd[0].append(acc)
             acc = ''
             firstword = False
+            globbing = False
         if endcmd and cmd[0]:
             if result and result[-1][2] == True:
                 cmd[1] = True
