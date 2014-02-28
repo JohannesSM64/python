@@ -201,31 +201,31 @@ def process(parsed):
         infile = parts[0][1]
         outfile = parts[0][2]
 
+        ## Builtin?
+        if cmd[0] in builtins:
+            builtins[cmd[0]](*cmd[1:])
+            if len(parts) > 1:
+                handle_parts(parts[1:], None)
+            return
+
         ## Input file
-        if infile == True:
+        if infile == True and last:
             infile = last.stdout
-        elif infile == False:
-            infile = sys.stdin
         else:
-            infile = open(infile)
+            infile = sys.stdin
 
         ## Output file
         if outfile == True:
             outfile = subprocess.PIPE
             func = subprocess.Popen
-        elif outfile == False:
-            outfile = sys.stdout
         else:
-            outfile = open(outfile)
+            outfile = sys.stdout
 
         ## Run
         last = func(cmd, stdin=infile, stdout=outfile)
         if len(parts) > 1:
             handle_parts(parts[1:], last)
 
-    if parsed[0][0][0] in builtins:
-        builtins[parsed[0][0][0]](*parsed[0][0][1:])
-        parsed = parsed[1:]
     if parsed:
         try:
             handle_parts(parsed, None)
