@@ -36,7 +36,16 @@ import readline
 import subprocess
 import copy
 
-config = os.path.expanduser('~/.shellrc')
+# Contains commands that are executed on startup; currently primarily
+# useful for defining aliases.
+config = os.getenv('HOME') + '/.shellrc'
+
+def prompt():
+    directory = os.getcwd()
+    if directory == os.getenv('HOME'):
+        return "> "
+    else:
+        return directory.split('/')[-1] + "> "
 
 readline.parse_and_bind('tab: complete')
 
@@ -235,7 +244,7 @@ def main():
 
     while True:
         try:
-            parsed = parse(input('@ '))
+            parsed = parse(input(prompt()))
             if parsed:
                 process(parsed)
         except EOFError:
