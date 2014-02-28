@@ -64,8 +64,9 @@ def cd_helper(dir):
 
 def cd(dir=None, *ignore):
     """ Change directory. Defaults to the home directory. """
-    earlierdirs.append(os.getcwd())
-    cd_helper(dir)
+    curdir = os.getcwd()
+    if cd_helper(dir):
+        earlierdirs.append(curdir)
 
 def cdu(*ignore):
     """ cd "undo"; go to previous working directory in history. """
