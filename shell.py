@@ -148,15 +148,15 @@ def parse(line):
                 continue
         elif c in ["'",'"'] and not escaped:
             quoted = not quoted
-        elif c in [' ','\t'] and not True in (quoted, escaped):
+        elif c in [' ','\t'] and not quoted and not escaped:
             endacc = True
-        elif c in ['*','?','[',']'] and not True in (quoted, escaped):
+        elif c in ['*','?','[',']'] and not quoted and not escaped:
             globbing = True
             acc += c
-        elif c == ';' and not True in (quoted, escaped):
+        elif c == ';' and not quoted and not escaped:
             endacc = True
             endcmd = True
-        elif c == '|' and not True in (quoted, escaped):
+        elif c == '|' and not quoted and not escaped:
             endacc = True
             endcmd = True
             outfile = True
