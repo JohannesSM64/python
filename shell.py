@@ -123,7 +123,9 @@ builtins = {
 
 def parse(line):
     acc = ''
-    cmd = [[], False, False]
+    cmd = []
+    infile = False
+    outfile = False
     result = []
     quoted = False
     escaped = False
@@ -157,7 +159,7 @@ def parse(line):
         elif c == '|' and not True in (quoted, escaped):
             endacc = True
             endcmd = True
-            cmd[2] = True
+            outfile = True
         else:
             acc += c
 
@@ -168,20 +170,22 @@ def parse(line):
             endcmd = True
         if endacc and acc:
             if globbing:
-                cmd[0].extend(sorted(glob(acc)))
+                cmd.extend(sorted(glob(acc)))
             elif firstword and acc in aliases:
                 exert(aliases[acc][:-1], result, 0)
-                cmd = copy.deepcopy(aliases[acc][-1])
+                cmd, infile, outfile = copy.deepcopy(aliases[acc][-1])
             else:
-                cmd[0].append(acc)
+                cmd.append(acc)
             acc = ''
             firstword = False
             globbing = False
-        if endcmd and cmd[0]:
+        if endcmd and cmd:
             if result and result[-1][2] == True:
-                cmd[1] = True
-            result.append(cmd)
-            cmd = [[], False, False]
+                infile = True
+            result.append((cmd, infile, outfile))
+            cmd = []
+            infile = False
+            outfile = False
             firstword = True
         if endloop:
             break
