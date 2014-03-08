@@ -41,11 +41,13 @@ import copy
 config = os.getenv('HOME') + '/.shellrc'
 
 def prompt():
+    result = "[36m" # cyan
     directory = os.getcwd()
-    if directory == os.getenv('HOME'):
-        return "> "
-    else:
-        return directory.split('/')[-1] + "> "
+    if directory != os.getenv('HOME'):
+        result += directory.split('/')[-1]
+    result += "> "
+    result += "[37m" # reset color
+    return result
 
 readline.parse_and_bind('tab: complete')
 
