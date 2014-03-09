@@ -40,13 +40,17 @@ import copy
 # useful for defining aliases.
 config = os.getenv('HOME') + '/.shellrc'
 
+colors = dict(zip(['black', 'red', 'green', 'yellow', 'blue', 'magenta',
+                   'cyan', 'reset'],
+                  ['\033[{}m'.format(x) for x in range(30,38)]))
+
 def prompt():
-    result = "[36m" # cyan
+    result = colors['cyan']
     directory = os.getcwd()
     if directory != os.getenv('HOME'):
         result += directory.split('/')[-1]
     result += "> "
-    result += "[37m" # reset color
+    result += colors['reset']
     return result
 
 readline.parse_and_bind('tab: complete')
