@@ -23,7 +23,7 @@ historical baggage. It is hence not compliant with POSIX sh. """
 # - Pass input from file with <
 # - Run command in background with &
 # - Conditionals (&& and ||)
-# - Better completion: command names and files in other directories
+# - Command name completion
 
 # Written by Johannes Langøy, 2010. Public domain.
 # Updated 2014.
