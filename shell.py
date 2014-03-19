@@ -67,6 +67,7 @@ def cd_helper(dir):
             os.chdir(dir)
         else:
             os.chdir(os.getenv('HOME'))
+        return True
     except OSError as inst:
         print('cd: {0}'.format(inst))
 
