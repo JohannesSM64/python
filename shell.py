@@ -42,7 +42,7 @@ config = os.getenv('HOME') + '/.shellrc'
 
 colors = dict(zip(['black', 'red', 'green', 'yellow', 'blue', 'magenta',
                    'cyan', 'reset'],
-                  ['\033[{}m'.format(x) for x in range(30,38)]))
+                  ['\001\033[{}m\002'.format(x) for x in range(30,38)]))
 
 def prompt():
     result = colors['cyan']
