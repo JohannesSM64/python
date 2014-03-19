@@ -17,6 +17,7 @@ historical baggage. It is hence not compliant with POSIX sh. """
 # - Multiple commands with ;
 # - Piping with |
 # - Globbing with * ? [ ]
+# - Refer to home directory with ~
 
 # Ideas:
 # - Redirect output with > and 2>
