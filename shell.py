@@ -53,26 +53,8 @@ def prompt():
     result += colors['reset']
     return result
 
-def complete(text, state):
-    dir_c = ''
-    if '/' in text:
-        base_c = os.path.basename(text)
-        dir_c = os.path.dirname(text)
-        if not dir_c.endswith('/'):
-            dir_c += '/'
-        files = os.listdir(dir_c)
-        matches = [x for x in files if x.startswith(base_c)]
-    else:
-        files = os.listdir()
-        matches = [x for x in files if x.startswith(text)]
-    try:
-        return dir_c + matches[state]
-    except IndexError:
-        return None
-
 readline.parse_and_bind('tab: complete')
 readline.set_completer_delims(' ')
-readline.set_completer(complete)
 
 earlierdirs = []
 laterdirs = []
