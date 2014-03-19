@@ -119,13 +119,22 @@ def alias(name=None, line=None, *ignore):
         for i in aliases:
             print('{}: {}'.format(i, aliases[i]))
 
+def source(filename=None, *ignore):
+    """ Eval a file. """
+    with open(filename) as f:
+        for line in f.readlines():
+            line = line.rstrip()
+            if line: # nonblank
+                process(parse(line))
+
 builtins = {
     'cd' : cd,
     'cdu': cdu,
     'cdr': cdr,
     'get': getvar,
     'set': setvar,
-    'alias': alias
+    'alias': alias,
+    'source': source
 }
 
 def parse(line):
@@ -247,12 +256,7 @@ def process(parsed):
 def main():
     os.environ['SHELL'] = 'sh' # workaround for a strange python issue
 
-    if os.path.exists(config):
-        with open(config) as f:
-            for line in f.readlines():
-                line = line.rstrip()
-                if line: # nonblank
-                    process(parse(line))
+    source(config)
 
     while True:
         try:
