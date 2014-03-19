@@ -146,6 +146,7 @@ def parse(line):
     quoted = False
     escaped = False
     globbing = False
+    tilde = False
     endacc = False
     endcmd = False
     endloop = False
@@ -169,6 +170,9 @@ def parse(line):
         elif c in ['*','?','[',']'] and not quoted and not escaped:
             globbing = True
             acc += c
+        elif c == '~' and not quoted and not escaped:
+            tilde = True
+            acc += c
         elif c == ';' and not quoted and not escaped:
             endacc = True
             endcmd = True
@@ -185,6 +189,8 @@ def parse(line):
             endacc = True
             endcmd = True
         if endacc and acc:
+            if tilde:
+                acc = os.path.expanduser(acc)
             if globbing:
                 cmd.extend(sorted(glob(acc)))
             elif firstword and acc in aliases:
@@ -195,6 +201,7 @@ def parse(line):
             acc = ''
             firstword = False
             globbing = False
+            tilde = False
         if endcmd and cmd:
             if result and result[-1][2] == True:
                 infile = True
