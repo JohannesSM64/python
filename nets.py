@@ -8,22 +8,28 @@ Open a wiki/search engine query in your web browser.
 import sys
 import webbrowser
 import urllib.parse
-import colors
 
 sites = {
-    'd':   'http://ddg.gg/?q={}',
-    'y':   'http://www.yandex.com/yandsearch?text={}',
-    'w':   'http://en.wikipedia.org/w/index.php?title=Special:Search&search={}',
-    'nw':  'http://no.wikipedia.org/w/index.php?title=Special:Search&search={}',
-    'm':   'http://en.metapedia.org/w/index.php?title=Special:Search&search={}',
-    'aur': 'http://aur.archlinux.org/packages.php?K={}&do_Search=Go',
-    'aw':  'http://wiki.archlinux.org/w/index.php?title=Special:Search&search={}'
+    'd':   {'name': 'Duck Duck Go',
+            'url': 'http://ddg.gg/?q={}'},
+    'y':   {'name': 'Yandex',
+            'url': 'http://www.yandex.com/yandsearch?text={}'},
+    'w':   {'name': 'English Wikipedia',
+            'url': 'http://en.wikipedia.org/w/index.php?title=Special:Search&search={}'},
+    'nw':  {'name': 'Norwegian Wikipedia',
+            'url': 'http://no.wikipedia.org/w/index.php?title=Special:Search&search={}'},
+    'm':   {'name': 'Metapedia',
+            'url': 'http://en.metapedia.org/w/index.php?title=Special:Search&search={}'},
+    'aw':  {'name': 'Arch Linux Wiki',
+            'url': 'http://wiki.archlinux.org/w/index.php?title=Special:Search&search={}'},
+    'aur': {'name': 'Arch User Repository',
+            'url': 'http://aur.archlinux.org/packages.php?K={}&do_Search=Go'}
 }
 
 def open_site(kw, term):
     """ Open the site associated with the keyword in sites. """
     try:
-        webbrowser.open(sites[kw].format(urllib.parse.quote(term)))
+        webbrowser.open(sites[kw]['url'].format(urllib.parse.quote(term)))
     except KeyError:
         print("No such site: " + kw)
 
@@ -34,8 +40,7 @@ if __name__ == '__main__':
         print('Usage: {} site term'.format(os.path.basename(sys.argv[0])))
         print('Available sites:')
         for i in sites:
-            print('* {}: {}'.format(i, sites[i].replace('{}', colors.fg['red'] +
-                '{}' + colors.fg['default'])))
+            print('* {}: {}'.format(i, sites[i]['name']))
         sys.exit(1)
 
     open_site(sys.argv[1], ' '.join(sys.argv[2:]))
