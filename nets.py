@@ -12,9 +12,12 @@ import colors
 
 sites = {
     'd':   'http://ddg.gg/?q={}',
-    'w':   'http://en.wikipedia.org/wiki/{}',
-    'aw':  'http://wiki.archlinux.org/index.php/{}',
+    'y':   'http://www.yandex.com/yandsearch?text={}',
+    'w':   'http://en.wikipedia.org/w/index.php?title=Special:Search&search={}',
+    'nw':  'http://no.wikipedia.org/w/index.php?title=Special:Search&search={}',
+    'm':   'http://en.metapedia.org/w/index.php?title=Special:Search&search={}',
     'aur': 'http://aur.archlinux.org/packages.php?K={}&do_Search=Go',
+    'aw':  'http://wiki.archlinux.org/w/index.php?title=Special:Search&search={}'
 }
 
 def open_site(kw, term):
