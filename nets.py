@@ -8,31 +8,31 @@
 import sys
 import webbrowser
 import urllib.parse
+from colors import *
 
-sitedict = {
-    'wiki':  'http://en.wikipedia.org/wiki/{}',
-    'awiki': 'http://wiki.archlinux.org/index.php/{}',
-    'aur':   'http://aur.archlinux.org/packages.php?K={}&do_Search=Go',
-    'ddg':   'http://ddg.gg/?q={}'
+sites = {
+    'd':   'http://ddg.gg/?q={}',
+    'w':   'http://en.wikipedia.org/wiki/{}',
+    'aw':  'http://wiki.archlinux.org/index.php/{}',
+    'aur': 'http://aur.archlinux.org/packages.php?K={}&do_Search=Go',
 }
 
 def open_site(kw, term):
-    """ Open the site associated with the keyword in sitedict. """
-    webbrowser.open(sitedict[kw].format(urllib.parse.quote(term)))
+    """ Open the site associated with the keyword in sites. """
+    try:
+        webbrowser.open(sites[kw].format(urllib.parse.quote(term)))
+    except KeyError:
+        print("No such site: " + kw)
 
 if __name__ == '__main__':
     import os
 
-    def error(text):
-        print(text)
-        print('Available sites:')
-        for i in sitedict:
-            print('* {}: {}'.format(i, sitedict[i]))
-        sys.exit(1)
-
     if len(sys.argv) < 3:
-        error('Usage: {} site term'.format(os.path.basename(sys.argv[0])))
-    elif not sys.argv[1] in sitedict:
-        error('No such site in sitedict: {}'.format(sys.argv[1]))
+        print('Usage: {} site term'.format(os.path.basename(sys.argv[0])))
+        print('Available sites:')
+        for i in sites:
+            print('* {}: {}'.format(i, sites[i].replace('{}', fg_colors['red'] +
+                '{}' + fg_colors['default'])))
+        sys.exit(1)
 
     open_site(sys.argv[1], ' '.join(sys.argv[2:]))

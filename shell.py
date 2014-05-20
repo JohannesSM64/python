@@ -30,6 +30,7 @@ historical baggage. It is hence not compliant with POSIX sh. """
 # Updated 2014.
 
 from utils import *
+from colors import *
 import os
 import sys
 from glob import glob
@@ -41,17 +42,13 @@ import copy
 # useful for defining aliases.
 config = os.getenv('HOME') + '/.shellrc'
 
-colors = dict(zip(['black', 'red', 'green', 'yellow', 'blue', 'magenta',
-                   'cyan', 'reset'],
-                  ['\001\033[{}m\002'.format(x) for x in range(30,38)]))
-
 def prompt():
-    result = colors['cyan']
+    result = fg_colors['cyan']
     directory = os.getcwd()
     if directory != os.getenv('HOME'):
         result += directory.split('/')[-1]
     result += "> "
-    result += colors['reset']
+    result += fg_colors['default']
     return result
 
 readline.parse_and_bind('tab: complete')
@@ -265,7 +262,8 @@ def process(parsed):
 def main():
     os.environ['SHELL'] = 'sh' # workaround for a strange python issue
 
-    source(config)
+    if os.path.exists(config):
+        source(config)
 
     while True:
         try:
