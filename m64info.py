@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""
+This shows information extracted from the header of an input recording file
+for Mupen 64, a Nintendo 64 emulator.
+"""
+# Written by Johannes Langøy, 2011. Public domain.
 
 import sys
 import array

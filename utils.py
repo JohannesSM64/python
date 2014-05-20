@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+"""
+Assorted utility functions.
+"""
+# Written by Johannes Langøy, 2014. Public domain.
+
 def flatten(lst):
     out = []
     for i in lst:

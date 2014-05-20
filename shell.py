@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
-""" A command shell implementation that aims to be simple and free of
-historical baggage. It is hence not compliant with POSIX sh. """
-
+"""
+A command shell implementation that aims to be simple and free of
+historical baggage. It is hence not compliant with POSIX sh.
+"""
 # Current features:
 # - Basic line editing, history and file name completion (readline)
 # - Directory changing with cd
@@ -26,11 +26,10 @@ historical baggage. It is hence not compliant with POSIX sh. """
 # - Conditionals (&& and ||)
 # - Command name completion
 
-# Written by Johannes Langøy, 2010. Public domain.
-# Updated 2014.
+# Written by Johannes Langøy, 2010-2014. Public domain.
 
 from utils import *
-from colors import *
+import colors
 import os
 import sys
 from glob import glob
@@ -43,12 +42,12 @@ import copy
 config = os.getenv('HOME') + '/.shellrc'
 
 def prompt():
-    result = fg_colors['cyan']
+    result = colors.fg['cyan']
     directory = os.getcwd()
     if directory != os.getenv('HOME'):
         result += directory.split('/')[-1]
     result += "> "
-    result += fg_colors['default']
+    result += colors.fg['default']
     return result
 
 readline.parse_and_bind('tab: complete')

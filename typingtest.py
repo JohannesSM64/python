@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
-""" See how many lines you can type out in a set time. """
-
+"""
+See how many lines you can type out in a set time.
+"""
 # Written by Johannes Langøy, 2010. Public domain.
 
 import sys

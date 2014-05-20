@@ -1,19 +1,23 @@
 # -*- coding: utf-8 -*-
-# Access ANSI color codes.
-# Usage example: print(fg_colors['red'] + "Hello World!" + fg_colors['default'])
-# 2014, Johannes Langøy
+"""
+Access ANSI color codes.
+Usage example: print(fg_colors['red'] + "Hello World!" + fg_colors['default'])
+"""
+# Written by Johannes Langøy, 2014. Public domain.
+
+__all__ = ['fg', 'bg']
 
 def ansi_code(x):
     return '\001\033[{}m\002'.format(x)
 
-fg_colors = dict(zip(['black', 'red', 'green', 'yellow', 'blue', 'magenta',
+fg = dict(zip(['black', 'red', 'green', 'yellow', 'blue', 'magenta',
                       'cyan', 'white'],
                      [ansi_code(x) for x in range(30,38)]))
 
-fg_colors['default'] = ansi_code(39)
+fg['default'] = ansi_code(39)
 
-bg_colors = dict(zip(['black', 'red', 'green', 'yellow', 'blue', 'magenta',
+bg = dict(zip(['black', 'red', 'green', 'yellow', 'blue', 'magenta',
                       'cyan', 'white'],
                      [ansi_code(x) for x in range(40,48)]))
 
-bg_colors['default'] = ansi_code(49)
+bg['default'] = ansi_code(49)

@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""
+A basic Tkinter-based text editor.
+"""
+# Written by Johannes Langøy, 2011. Public domain.
 
 import os
 import sys

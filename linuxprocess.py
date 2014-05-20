@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""
+LinuxProcess(pid) creates an object through which you can access information
+about the given process, such as command line and working directory.
+"""
+# Written by Johannes Langøy, 2011-2014. Public domain.
 
 import os
 import re
