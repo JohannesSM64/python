@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+# Access ANSI color codes.
+# Usage example: print(fg_colors['red'] + "Hello World!" + fg_colors['default'])
+# 2014, Johannes Langøy
 
 def ansi_code(x):
     return '\001\033[{}m\002'.format(x)
