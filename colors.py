@@ -11,13 +11,9 @@ def ansi_code(x):
     return '\001\033[{}m\002'.format(x)
 
 fg = dict(zip(['black', 'red', 'green', 'yellow', 'blue', 'magenta',
-                      'cyan', 'white'],
-                     [ansi_code(x) for x in range(30,38)]))
-
-fg['default'] = ansi_code(39)
+               'cyan', 'white', 'default'],
+              map(ansi_code, list(range(30,38)) + [39])))
 
 bg = dict(zip(['black', 'red', 'green', 'yellow', 'blue', 'magenta',
-                      'cyan', 'white'],
-                     [ansi_code(x) for x in range(40,48)]))
-
-bg['default'] = ansi_code(49)
+               'cyan', 'white', 'default'],
+              map(ansi_code, list(range(40,48)) + [49])))
