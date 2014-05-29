@@ -1,4 +1,9 @@
-dice = [5,3,5,6,2]
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Yatzy implemented in Python.
+"""
+# Written by Johannes Langøy, 2014. Public domain.
 
 def numfunc(dice, n):
     amt = dice.count(n)
