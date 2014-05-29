@@ -31,8 +31,8 @@ def two_pairs(dice):
                 return (saved*2) + (i*2)
             else:
                 saved = i
-def three_alike(dice): return amtfunc(dice, 3)
-def four_alike(dice): return amtfunc(dice, 4)
+def three_of_a_kind(dice): return amtfunc(dice, 3)
+def four_of_a_kind(dice): return amtfunc(dice, 4)
 def small_straight(dice):
     for i in range(1,6):
         if dice.count(i) == 0:
@@ -54,9 +54,27 @@ def full_house(dice):
             three_of = i
         if two_of and three_of:
             return (two_of*2) + (three_of*3)
-chance = sum
+
 def yatzy(dice):
     for i in dice:
         if i != dice[0]:
             return None
     return 50
+
+goals = {
+    "Ones": ones,
+    "Twos": twos,
+    "Threes": threes,
+    "Fours": fours,
+    "Fives": fives,
+    "Sixes": sixes,
+    "One pair": one_pair,
+    "Two pairs": two_pairs,
+    "Three of a kind": three_of_a_kind,
+    "Four of a kind": four_of_a_kind,
+    "Small straight": small_straight,
+    "Large straight": large_straight,
+    "Full house": full_house,
+    "Chance": sum,
+    "Yatzy": yatzy
+}
