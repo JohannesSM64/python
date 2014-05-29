@@ -5,6 +5,8 @@ Yatzy implemented in Python.
 """
 # Written by Johannes Langøy, 2014. Public domain.
 
+import random
+
 def numfunc(dice, n):
     amt = dice.count(n)
     if amt >= 1:
@@ -54,7 +56,6 @@ def full_house(dice):
             three_of = i
         if two_of and three_of:
             return (two_of*2) + (three_of*3)
-
 def yatzy(dice):
     for i in dice:
         if i != dice[0]:
@@ -78,3 +79,8 @@ goals = {
     "Chance": sum,
     "Yatzy": yatzy
 }
+
+def fill(dice):
+    while len(dice) < 5:
+        dice.append(random.randint(1,6))
+    return dice
