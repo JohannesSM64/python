@@ -21,7 +21,7 @@ sites = {
     'm':   {'name': 'Metapedia',
             'url': 'http://en.metapedia.org/w/index.php?title=Special:Search&search={}'},
     'aw':  {'name': 'Arch Linux Wiki',
-            'url': 'http://wiki.archlinux.org/w/index.php?title=Special:Search&search={}'},
+            'url': 'http://wiki.archlinux.org/index.php?title=Special:Search&search={}'},
     'aur': {'name': 'Arch User Repository',
             'url': 'http://aur.archlinux.org/packages.php?K={}&do_Search=Go'}
 }
