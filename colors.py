@@ -8,7 +8,7 @@ Usage example: print(fg_colors['red'] + "Hello World!" + fg_colors['default'])
 __all__ = ['fg', 'bg']
 
 def ansi_code(x):
-    return '\001\033[{}m\002'.format(x)
+    return '\033[{}m'.format(x)
 
 fg = dict(zip(['black', 'red', 'green', 'yellow', 'blue', 'magenta',
                'cyan', 'white', 'default'],
